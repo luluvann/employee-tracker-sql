@@ -1,0 +1,28 @@
+{
+  "name": "12-employee-tracker-sql-expressjs",
+  "version": "1.0.0",
+  "description": "An employee tracker using MySQL database and ExpressJS backend",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luluvann/employee-tracker-sql-expressjs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luluvann/employee-tracker-sql-expressjs/issues"
+  },
+  "homepage": "https://github.com/luluvann/employee-tracker-sql-expressjs#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^8.0.0",
+    "mysql2": "^2.2.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
