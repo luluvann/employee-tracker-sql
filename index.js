@@ -2,26 +2,26 @@ const inquirer = require("inquirer");
 const db = require("./connection");
 const cTable = require("console.table");
 
-function viewAllDepartments() {
-  db.query(`SELECT name AS 'department', id FROM employees`, (err, rows) => {
+async function viewAllDepartments() {
+  db.query(`SELECT name AS 'department', id FROM departments`, (err, rows) => {
     const table = cTable.getTable(rows);
-    console.log(table);
+    console.log('\n','\n','All Departments','\n',table,'\n','\n');
   });
-  init();
+  await init();
 }
 
-function viewAllRoles() {
+async function viewAllRoles() {
   db.query(
     `SELECT roles.title, roles.id, departments.name AS 'department', roles.salary FROM roles LEFT JOIN departments ON roles.department_id = departments.id`,
     (err, rows) => {
       const table = cTable.getTable(rows);
-      console.log(table);
+      console.log('\n','\n','All Roles','\n',table,'\n','\n');
     }
   );
-  init();
+  await init();
 }
 
-function viewAllEmployees() {
+async function viewAllEmployees() {
   db.query(
     `SELECT 
     e.id, 
@@ -37,11 +37,17 @@ function viewAllEmployees() {
   LEFT JOIN departments ON roles.department_id = departments.id`,
     (err, rows) => {
       const table = cTable.getTable(rows);
-      console.log(table);
+      console.log('\n','\n','All Employees','\n',table,'\n','\n');
     }
   );
-  init();
+  await init();
 }
+
+/* async function addAnEmployee(){
+    inquirer.prompt([...initialQuestion]).then((data) => {
+
+    }
+} */
 
 const initialQuestion = [
   {
@@ -54,22 +60,28 @@ const initialQuestion = [
       "view all employees",
       "add a department",
       "add a role",
-      "add am employee",
+      "add a employee",
       "update an employee role",
+      "exit",
     ],
   },
 ];
 
 function init() {
-  return inquirer.prompt([...initialQuestion]);
+inquirer.prompt([...initialQuestion]).then((data) => {
+    if (data.action === "view all employees") {
+      viewAllEmployees();
+    } 
+    if (data.action === "view all roles") {
+      viewAllRoles();
+    }
+    if (data.action === "view all departments") {
+      viewAllDepartments();
+    }
+    if(data.action === "exit"){
+        process.exit()
+    }
+  });;
 }
 
-init().then((data) => {
-  if (data.action === "view all employees") {
-    viewAllEmployees();
-  } else if (data.action === "view all roles") {
-    viewAllRoles();
-  } else if (data.action === "view all departments") {
-    viewAllDepartments();
-  }
-});
+init();

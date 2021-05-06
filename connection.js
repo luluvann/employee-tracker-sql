@@ -3,9 +3,9 @@ require('dotenv').config()
 MYSQL_PASS=replacewithyourpassword
 */
 
-const mysql = require('mysql2/');
+const mysql = require('mysql2');
 
-const db = await mysql.createConnection({
+const db = mysql.createConnection({
   host: 'localhost',
   // Your MySQL username,
   user: 'root',
