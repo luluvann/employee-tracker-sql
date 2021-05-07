@@ -5,7 +5,7 @@ const cTable = require("console.table");
 async function viewAllDepartments() {
   db.query(`SELECT name AS 'department', id FROM departments`, (err, rows) => {
     const table = cTable.getTable(rows);
-    console.log('\n','\n','All Departments','\n',table,'\n','\n');
+    console.log("\n", "\n", "All Departments", "\n", table, "\n", "\n");
   });
   await init();
 }
@@ -15,7 +15,7 @@ async function viewAllRoles() {
     `SELECT roles.title, roles.id, departments.name AS 'department', roles.salary FROM roles LEFT JOIN departments ON roles.department_id = departments.id`,
     (err, rows) => {
       const table = cTable.getTable(rows);
-      console.log('\n','\n','All Roles','\n',table,'\n','\n');
+      console.log("\n", "\n", "All Roles", "\n", table, "\n", "\n");
     }
   );
   await init();
@@ -37,23 +37,63 @@ async function viewAllEmployees() {
   LEFT JOIN departments ON roles.department_id = departments.id`,
     (err, rows) => {
       const table = cTable.getTable(rows);
-      console.log('\n','\n','All Employees','\n',table,'\n','\n');
+      console.log("\n", "\n", "All Employees", "\n", table, "\n", "\n");
     }
   );
   await init();
 }
 
-/* async function addAnEmployee(){
-    inquirer.prompt([...initialQuestion]).then((data) => {
+async function addADepartment() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "addDepartment",
+        message: "Enter the name of the department to add: ",
+      },
+    ])
+    .then((data) => {
+      let department_name = [[data.addDepartment]];
+      console.log(department_name);
+      db.query(
+        "INSERT INTO departments (name) VALUES ?",
+        [department_name],
+        (err, results) => {
+          if (err) {
+            return console.error(err.message);
+          }
+          console.log(
+            "Number of rows successfully added: " + results.affectedRows
+          );
+        }
+      );
+    });
+  await init();
+}
 
-    }
-} */
+const addRoleQuestions = [
+  {
+    type: "input",
+    name:"title",
+    message:"What is the role's title?: "
+  },
+  {
+    type: "input",
+    name:"title",
+    message:"What is the role's salary?: "
+  },
+  {
+    type: "input",
+    name:"title",
+    message:"What is the deparment's ID which the role belongs to?: "
+  },
+];
 
 const initialQuestion = [
   {
     type: "list",
     name: "action",
-    message: "What would you like to do:",
+    message: "What would you like to do: ",
     choices: [
       "view all departments",
       "view all roles",
@@ -68,20 +108,23 @@ const initialQuestion = [
 ];
 
 function init() {
-inquirer.prompt([...initialQuestion]).then((data) => {
+  inquirer.prompt([...initialQuestion]).then((data) => {
     if (data.action === "view all employees") {
       viewAllEmployees();
-    } 
+    }
     if (data.action === "view all roles") {
       viewAllRoles();
     }
     if (data.action === "view all departments") {
       viewAllDepartments();
     }
-    if(data.action === "exit"){
-        process.exit()
+    if (data.action === "add a department") {
+      addADepartment();
     }
-  });;
+    if (data.action === "exit") {
+      process.exit();
+    }
+  });
 }
 
 init();
