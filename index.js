@@ -2,6 +2,8 @@ const inquirer = require("inquirer");
 const db = require("./connection");
 const cTable = require("console.table");
 
+/* Query functions */
+    /* view tables functions*/
 async function viewAllDepartments() {
   db.query(`SELECT name AS 'department', id FROM departments`, (err, rows) => {
     const table = cTable.getTable(rows);
@@ -42,8 +44,8 @@ async function viewAllEmployees() {
   );
   await init();
 }
-
-async function addADepartment() {
+    /* add to tables functions*/ 
+async function addDepartment() {
   inquirer
     .prompt([
       {
@@ -71,24 +73,59 @@ async function addADepartment() {
   await init();
 }
 
-const addRoleQuestions = [
-  {
-    type: "input",
-    name:"title",
-    message:"What is the role's title?: "
-  },
-  {
-    type: "input",
-    name:"title",
-    message:"What is the role's salary?: "
-  },
-  {
-    type: "input",
-    name:"title",
-    message:"What is the deparment's ID which the role belongs to?: "
-  },
-];
+async function addRole() {
+  inquirer.prompt([...addRoleQuestions]).then((data) => {
+    let role_data = [[data.title, data.salary, data.departmentID]];
+    db.query(
+      "INSERT INTO roles (title, salary, department_id) VALUES ?",
+      [role_data],
+      (err, results) => {
+        if (err) {
+          return console.error(err.message);
+        }
+        console.log(
+          "Number of rows successfully added: " + results.affectedRows
+        );
+      }
+    );
+  });
+  await init();
+}
 
+async function addEmployee(addEmployeeQuestions) {
+    let newAddEmployeeQuestions = addEmployeeQuestions
+    let rolesList = []
+    db.query(
+        `SELECT title, id FROM roles `,
+        (err, rows) => {
+            for(let i = 0; i < rows.length; i++){
+               rolesList.push(rows[i].title)
+            }
+            newAddEmployeeQuestions[2].choices = rolesList
+            
+        }
+    )
+
+    inquirer.prompt([...newAddEmployeeQuestions]).then((data) => {
+      let role_data = [[data.firstName, data.LastName, data.role]];
+      console.log(data)
+/*       db.query(
+        "INSERT INTO roles (title, salary, department_id) VALUES ?",
+        [role_data],
+        (err, results) => {
+          if (err) {
+            return console.error(err.message);
+          }
+          console.log(
+            "Number of rows successfully added: " + results.affectedRows
+          );
+        }
+      ); */
+    });
+    /* await init(); */
+  }
+
+/* Questions */
 const initialQuestion = [
   {
     type: "list",
@@ -100,13 +137,51 @@ const initialQuestion = [
       "view all employees",
       "add a department",
       "add a role",
-      "add a employee",
+      "add an employee",
       "update an employee role",
       "exit",
     ],
   },
 ];
 
+const addRoleQuestions = [
+    {
+      type: "input",
+      name: "title",
+      message: "What is the role's title?: ",
+    },
+    {
+      type: "input",
+      name: "salary",
+      message: "What is the role's salary?: ",
+    },
+    {
+      type: "input",
+      name: "departmentID",
+      message: "What is the deparment's ID which the role belongs to?: ",
+    },
+  ];
+
+  const addEmployeeQuestions = [
+    {
+      type: "input",
+      name: "firstName",
+      message: "What is the new employee's first name?: ",
+    },
+    {
+      type: "input",
+      name: "lastName",
+      message: "What is the new employee's last name?: ",
+    },
+    {
+      type: "list",
+      name: "role",
+      message: "What role will the new employee have?: ",
+      choices:[""]
+    },
+  ];
+
+/* Prompts function*/  
 function init() {
   inquirer.prompt([...initialQuestion]).then((data) => {
     if (data.action === "view all employees") {
@@ -119,12 +194,21 @@ function init() {
       viewAllDepartments();
     }
     if (data.action === "add a department") {
-      addADepartment();
+      addDepartment();
     }
+    if (data.action === "add a role") {
+      addRole();
+    }
+    if (data.action === "add an employee") {
+        addEmployee(addEmployeeQuestions)
+      }
     if (data.action === "exit") {
       process.exit();
     }
   });
 }
 
+/* App start*/
 init();
+
+
