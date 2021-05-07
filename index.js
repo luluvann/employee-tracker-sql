@@ -3,7 +3,7 @@ const db = require("./connection");
 const cTable = require("console.table");
 
 /* Query functions */
-    /* view tables functions*/
+/* view tables functions*/
 async function viewAllDepartments() {
   db.query(`SELECT name AS 'department', id FROM departments`, (err, rows) => {
     const table = cTable.getTable(rows);
@@ -44,8 +44,8 @@ async function viewAllEmployees() {
   );
   await init();
 }
-    /* add to tables functions*/ 
-async function addDepartment() {
+/* add to tables functions*/
+async function addADepartment() {
   inquirer
     .prompt([
       {
@@ -69,8 +69,8 @@ async function addDepartment() {
           );
         }
       );
+      init()
     });
-  await init();
 }
 
 async function addRole() {
@@ -86,30 +86,42 @@ async function addRole() {
         console.log(
           "Number of rows successfully added: " + results.affectedRows
         );
+        
       }
     );
+    init();
   });
-  await init();
+ 
 }
 
+function queryRolesManagersLists(addEmployeeQuestions) {
+  let rolesList = [];
+  db.query(`SELECT title, id FROM roles `, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      rolesList.push(rows[i].title);
+    }
+    addEmployeeQuestions[2].choices = rolesList;
+  });
+  let managersList = [];
+  db.query(
+    `SELECT CONCAT(first_name,", " , last_name) AS managers, id FROM employees`,
+    (err, rows) => {
+      for (let i = 0; i < rows.length; i++) {
+        managersList.push(rows[i].managers);
+      }
+      addEmployeeQuestions[3].choices = managersList;
+      
+    }
+  );
+  
+  return addEmployeeQuestions;
+}
 async function addEmployee(addEmployeeQuestions) {
-    let newAddEmployeeQuestions = addEmployeeQuestions
-    let rolesList = []
-    db.query(
-        `SELECT title, id FROM roles `,
-        (err, rows) => {
-            for(let i = 0; i < rows.length; i++){
-               rolesList.push(rows[i].title)
-            }
-            newAddEmployeeQuestions[2].choices = rolesList
-            
-        }
-    )
-
-    inquirer.prompt([...newAddEmployeeQuestions]).then((data) => {
-      let role_data = [[data.firstName, data.LastName, data.role]];
-      console.log(data)
-/*       db.query(
+  let newAddEmployeeQuestions = queryRolesManagersLists(addEmployeeQuestions);
+  inquirer.prompt([...newAddEmployeeQuestions]).then((data) => {
+    let employee_data = [[data.firstName, data.LastName, data.role, data.manager]];
+    console.log(data);
+    /*       db.query(
         "INSERT INTO roles (title, salary, department_id) VALUES ?",
         [role_data],
         (err, results) => {
@@ -121,9 +133,9 @@ async function addEmployee(addEmployeeQuestions) {
           );
         }
       ); */
-    });
-    /* await init(); */
-  }
+  });
+  /* await init(); */
+}
 
 /* Questions */
 const initialQuestion = [
@@ -145,43 +157,49 @@ const initialQuestion = [
 ];
 
 const addRoleQuestions = [
-    {
-      type: "input",
-      name: "title",
-      message: "What is the role's title?: ",
-    },
-    {
-      type: "input",
-      name: "salary",
-      message: "What is the role's salary?: ",
-    },
-    {
-      type: "input",
-      name: "departmentID",
-      message: "What is the deparment's ID which the role belongs to?: ",
-    },
-  ];
+  {
+    type: "input",
+    name: "title",
+    message: "What is the role's title?: ",
+  },
+  {
+    type: "input",
+    name: "salary",
+    message: "What is the role's salary?: ",
+  },
+  {
+    type: "input",
+    name: "departmentID",
+    message: "What is the deparment's ID which the role belongs to?: ",
+  },
+];
 
-  const addEmployeeQuestions = [
-    {
-      type: "input",
-      name: "firstName",
-      message: "What is the new employee's first name?: ",
-    },
-    {
-      type: "input",
-      name: "lastName",
-      message: "What is the new employee's last name?: ",
-    },
-    {
-      type: "list",
-      name: "role",
-      message: "What role will the new employee have?: ",
-      choices:[""]
-    },
-  ];
+const addEmployeeQuestions = [
+  {
+    type: "input",
+    name: "firstName",
+    message: "What is the new employee's first name?: ",
+  },
+  {
+    type: "input",
+    name: "lastName",
+    message: "What is the new employee's last name?: ",
+  },
+  {
+    type: "list",
+    name: "role",
+    message: "What role will the new employee have?: ",
+    choices: [""],
+  },
+  {
+    type: "list",
+    name: "manager",
+    message: "Who will the new employee report to?: ",
+    choices: ["none"],
+  },
+];
 
-/* Prompts function*/  
+/* Prompts function*/
 function init() {
   inquirer.prompt([...initialQuestion]).then((data) => {
     if (data.action === "view all employees") {
@@ -194,14 +212,14 @@ function init() {
       viewAllDepartments();
     }
     if (data.action === "add a department") {
-      addDepartment();
+      addADepartment();
     }
     if (data.action === "add a role") {
       addRole();
     }
     if (data.action === "add an employee") {
-        addEmployee(addEmployeeQuestions)
-      }
+      addEmployee(addEmployeeQuestions);
+    }
     if (data.action === "exit") {
       process.exit();
     }
@@ -210,5 +228,3 @@ function init() {
 
 /* App start*/
 init();
-
-
