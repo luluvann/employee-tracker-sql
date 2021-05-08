@@ -114,6 +114,29 @@ function queryRolesManagersLists(addEmployeeQuestions) {
   return addEmployeeQuestions;
 }
 
+function queryRolesEmployeesLists(updateEmployeeRoleQuestions) {
+  let rolesList = [];
+  db.query(`SELECT title, id FROM roles `, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      rolesList.push(rows[i].title);
+    }
+    updateEmployeeRoleQuestions[2].choices = rolesList;
+  });
+
+  let employeesList = [];
+  db.query(
+    `SELECT CONCAT(first_name,", " , last_name) AS employee, id FROM employees`,
+    (err, rows) => {
+      for (let i = 0; i < rows.length; i++) {
+        employeesList.push(rows[i].employee);
+      }
+      updateEmployeeRoleQuestions[1].choices = employeesList;
+    }
+  );
+
+  return updateEmployeeRoleQuestions;
+}
+
 async function addEmployee(addEmployeeQuestions) {
   let newAddEmployeeQuestions = queryRolesManagersLists(addEmployeeQuestions);
   inquirer.prompt([...newAddEmployeeQuestions]).then((data) => {
@@ -143,17 +166,17 @@ async function addEmployee(addEmployeeQuestions) {
             ];
 
             db.query(
-                "INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ?",
-                [employee_data],
-                (err, results) => {
-                  if (err) {
-                    return console.error(err.message);
-                  }
-                  console.log(
-                    "Number of rows successfully added: " + results.affectedRows
-                  );
+              "INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ?",
+              [employee_data],
+              (err, results) => {
+                if (err) {
+                  return console.error(err.message);
                 }
-              );
+                console.log(
+                  "Number of rows successfully added: " + results.affectedRows
+                );
+              }
+            );
           }
         );
       }
@@ -162,8 +185,14 @@ async function addEmployee(addEmployeeQuestions) {
   });
 }
 
-async function updateEmployee(){
-    
+async function updateEmployeeRole(updateEmployeeRoleQuestions) {
+  let newUpdateEmployeeRoleQuestions = queryRolesEmployeesLists(
+    updateEmployeeRoleQuestions
+  );
+
+  inquirer.prompt([...newUpdateEmployeeRoleQuestions]).then((data) => {
+    console.log(data);
+  });
 }
 
 /* Questions */
@@ -228,6 +257,27 @@ const addEmployeeQuestions = [
   },
 ];
 
+const updateEmployeeRoleQuestions = [
+ {
+    type: "input",
+    name: "test",
+    message: "",
+  },
+
+  {
+    type: "list",
+    name: "employeeToUpdate",
+    message: "Select the employee you'd like to modify: ",
+    choices: [""],
+  },
+  {
+    type: "list",
+    name: "newRole",
+    message: "Select the new role of the employee: ",
+    choices: [""],
+  },
+];
+
 /* Prompts function*/
 function init() {
   inquirer.prompt([...initialQuestion]).then((data) => {
@@ -248,6 +298,9 @@ function init() {
     }
     if (data.action === "add an employee") {
       addEmployee(addEmployeeQuestions);
+    }
+    if (data.action === "update an employee role") {
+      updateEmployeeRole(updateEmployeeRoleQuestions);
     }
     if (data.action === "exit") {
       process.exit();
