@@ -37,7 +37,7 @@ An app to view and interact with the employees SQL database from the command lin
     source db/db.sql
     ```
     ```
-    USE teams;
+    USE team;
     ```
     ```
     source db/schema.sql;

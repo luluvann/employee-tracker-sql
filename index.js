@@ -2,6 +2,8 @@ const inquirer = require("inquirer");
 const db = require("./connection");
 const cTable = require("console.table");
 
+
+
 /* Query functions */
 /* view tables functions*/
 async function viewAllDepartments() {
@@ -73,18 +75,28 @@ async function addADepartment() {
     });
 }
 
-async function addRole() {
-  inquirer.prompt([...addRoleQuestions]).then((data) => {
-    let role_data = [[data.title, data.salary, data.departmentID]];
+async function addRole(addRoleQuestions) {
+  let newAddRoleQuestions = queryDepartmentsList(addRoleQuestions);
+  inquirer.prompt([...newAddRoleQuestions]).then((data) => {
     db.query(
-      "INSERT INTO roles (title, salary, department_id) VALUES ?",
-      [role_data],
+      "SELECT id FROM departments WHERE name = ?",
+      [[data.department]],
       (err, results) => {
         if (err) {
           return console.error(err.message);
         }
-        console.log(
-          "Number of rows successfully added: " + results.affectedRows
+        let role_data = [[data.title, data.salary, results[0].id]];
+        db.query(
+          "INSERT INTO roles (title, salary, department_id) VALUES ?",
+          [role_data],
+          (err, results) => {
+            if (err) {
+              return console.error(err.message);
+            }
+            console.log(
+              "Number of rows successfully added: " + results.affectedRows
+            );
+          }
         );
       }
     );
@@ -135,6 +147,18 @@ function queryRolesEmployeesLists(updateEmployeeRoleQuestions) {
   );
 
   return updateEmployeeRoleQuestions;
+}
+
+function queryDepartmentsList(addRoleQuestions) {
+  let departmentsList = [];
+  db.query(`SELECT name AS department FROM departments `, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      departmentsList.push(rows[i].department);
+    }
+    addRoleQuestions[2].choices = departmentsList;
+  });
+
+  return addRoleQuestions;
 }
 
 async function addEmployee(addEmployeeQuestions) {
@@ -250,9 +274,10 @@ const addRoleQuestions = [
     message: "What is the role's salary?: ",
   },
   {
-    type: "input",
-    name: "departmentID",
-    message: "What is the deparment's ID which the role belongs to?: ",
+    type: "list",
+    name: "department",
+    message: "Select the department which the role belongs to: ",
+    choices: [""],
   },
 ];
 
@@ -318,7 +343,7 @@ function init() {
       addADepartment();
     }
     if (data.action === "add a role") {
-      addRole();
+      addRole(addRoleQuestions);
     }
     if (data.action === "add an employee") {
       addEmployee(addEmployeeQuestions);
