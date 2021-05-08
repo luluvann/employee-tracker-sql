@@ -189,9 +189,33 @@ async function updateEmployeeRole(updateEmployeeRoleQuestions) {
   let newUpdateEmployeeRoleQuestions = queryRolesEmployeesLists(
     updateEmployeeRoleQuestions
   );
-
   inquirer.prompt([...newUpdateEmployeeRoleQuestions]).then((data) => {
-    console.log(data);
+    let roleID = "";
+    let employeeFirstName = data.employeeToUpdate.split(", ")[0];
+    let employeeLastName = data.employeeToUpdate.split(", ")[1];
+    db.query(
+      `SELECT id FROM roles WHERE title = ?`,
+      [[data.role]],
+      (err, rows) => {
+        roleID = rows[0].id;
+
+        db.query(
+          `UPDATE employees
+            SET role_id = ?
+            WHERE first_name = ? AND last_name = ?`,
+          [roleID, employeeFirstName, employeeLastName],
+          (err, results) => {
+            if (err) {
+              return console.error(err.message);
+            }
+            console.log(
+              "Number of rows successfully updated: " + results.affectedRows
+            );
+          }
+        );
+      }
+    );
+    init();
   });
 }
 
@@ -258,7 +282,7 @@ const addEmployeeQuestions = [
 ];
 
 const updateEmployeeRoleQuestions = [
- {
+  {
     type: "input",
     name: "test",
     message: "",
@@ -272,7 +296,7 @@ const updateEmployeeRoleQuestions = [
   },
   {
     type: "list",
-    name: "newRole",
+    name: "role",
     message: "Select the new role of the employee: ",
     choices: [""],
   },
