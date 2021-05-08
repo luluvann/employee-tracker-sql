@@ -69,7 +69,7 @@ async function addADepartment() {
           );
         }
       );
-      init()
+      init();
     });
 }
 
@@ -86,12 +86,10 @@ async function addRole() {
         console.log(
           "Number of rows successfully added: " + results.affectedRows
         );
-        
       }
     );
     init();
   });
- 
 }
 
 function queryRolesManagersLists(addEmployeeQuestions) {
@@ -110,31 +108,62 @@ function queryRolesManagersLists(addEmployeeQuestions) {
         managersList.push(rows[i].managers);
       }
       addEmployeeQuestions[3].choices = managersList;
-      
     }
   );
-  
+
   return addEmployeeQuestions;
 }
+
 async function addEmployee(addEmployeeQuestions) {
   let newAddEmployeeQuestions = queryRolesManagersLists(addEmployeeQuestions);
   inquirer.prompt([...newAddEmployeeQuestions]).then((data) => {
-    let employee_data = [[data.firstName, data.LastName, data.role, data.manager]];
-    console.log(data);
-    /*       db.query(
-        "INSERT INTO roles (title, salary, department_id) VALUES ?",
-        [role_data],
-        (err, results) => {
-          if (err) {
-            return console.error(err.message);
+    /* Get the role's id from the table*/
+    let roleID = "";
+    db.query(
+      `SELECT id FROM roles WHERE title = ?`,
+      [[data.role]],
+      (err, rows) => {
+        roleID = rows[0].id;
+
+        /* Get the manager's id from the table*/
+        let managerID = "";
+        let splittedManagerName = data.manager.split(", ");
+        let firstNameManager = splittedManagerName[0];
+        let lastNameManager = splittedManagerName[1];
+
+        db.query(
+          `SELECT id FROM employees WHERE first_name = ? AND last_name = ?`,
+          [firstNameManager, lastNameManager],
+          (err, rows) => {
+            managerID = rows[0].id;
+
+            /*Data to Insert in employees table*/
+            let employee_data = [
+              [data.firstName, data.lastName, roleID, managerID],
+            ];
+
+            db.query(
+                "INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ?",
+                [employee_data],
+                (err, results) => {
+                  if (err) {
+                    return console.error(err.message);
+                  }
+                  console.log(
+                    "Number of rows successfully added: " + results.affectedRows
+                  );
+                }
+              );
           }
-          console.log(
-            "Number of rows successfully added: " + results.affectedRows
-          );
-        }
-      ); */
+        );
+      }
+    );
+    init();
   });
-  /* await init(); */
+}
+
+async function updateEmployee(){
+    
 }
 
 /* Questions */
