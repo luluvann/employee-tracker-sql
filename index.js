@@ -2,8 +2,6 @@ const inquirer = require("inquirer");
 const db = require("./connection");
 const cTable = require("console.table");
 
-
-
 /* Query functions */
 /* view tables functions*/
 async function viewAllDepartments() {
@@ -28,17 +26,17 @@ async function viewAllRoles() {
 async function viewAllEmployees() {
   db.query(
     `SELECT 
-    e.id, 
-    e.first_name, 
-    e.last_name, 
-    roles.title, 
-    departments.name AS 'department',
-    roles.salary,
-    CONCAT(m.first_name,' ' ,m.last_name) AS 'manager' 
-  FROM employees e 
-  LEFT JOIN employees m ON e.manager_id = m.id
-  LEFT JOIN roles ON e.role_id = roles.id 
-  LEFT JOIN departments ON roles.department_id = departments.id`,
+        e.id, 
+        e.first_name, 
+        e.last_name, 
+        roles.title, 
+        departments.name AS 'department',
+        roles.salary,
+        CONCAT(m.first_name,' ' ,m.last_name) AS 'manager' 
+    FROM employees e 
+    LEFT JOIN employees m ON e.manager_id = m.id
+    LEFT JOIN roles ON e.role_id = roles.id 
+    LEFT JOIN departments ON roles.department_id = departments.id`,
     (err, rows) => {
       const table = cTable.getTable(rows);
       console.log("\n", "\n", "All Employees", "\n", table, "\n", "\n");
@@ -332,26 +330,19 @@ function init() {
   inquirer.prompt([...initialQuestion]).then((data) => {
     if (data.action === "view all employees") {
       viewAllEmployees();
-    }
-    if (data.action === "view all roles") {
+    } else if (data.action === "view all roles") {
       viewAllRoles();
-    }
-    if (data.action === "view all departments") {
+    } else if (data.action === "view all departments") {
       viewAllDepartments();
-    }
-    if (data.action === "add a department") {
+    } else if (data.action === "add a department") {
       addADepartment();
-    }
-    if (data.action === "add a role") {
+    } else if (data.action === "add a role") {
       addRole(addRoleQuestions);
-    }
-    if (data.action === "add an employee") {
+    } else if (data.action === "add an employee") {
       addEmployee(addEmployeeQuestions);
-    }
-    if (data.action === "update an employee role") {
+    } else if (data.action === "update an employee role") {
       updateEmployeeRole(updateEmployeeRoleQuestions);
-    }
-    if (data.action === "exit") {
+    } else if (data.action === "exit") {
       process.exit();
     }
   });
