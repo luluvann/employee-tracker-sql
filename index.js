@@ -13,26 +13,29 @@ const updateEmployeeRoleQuestions = questions.updateEmployeeRoleQuestions;
 
 /* Query functions */
 /* view tables functions*/
-async function viewAllDepartments() {
-  const sql = `SELECT name AS 'department', id FROM departments`;
-  db.query(sql, (err, rows) => {
+
+async function viewTable(sqlQuery, tableName) {
+  db.query(sqlQuery, (err, rows) => {
     const table = cTable.getTable(rows);
-    console.log("\n", "\n", "All Departments", "\n", table, "\n", "\n");
+    console.log("\n", "\n", `All ${tableName}`, "\n", table, "\n", "\n");
   });
   await prompt();
 }
 
-async function viewAllRoles() {
-  const sql = `SELECT roles.title, roles.id, departments.name AS 'department', roles.salary FROM roles LEFT JOIN departments ON roles.department_id = departments.id`;
-  db.query(sql, (err, rows) => {
-    const table = cTable.getTable(rows);
-    console.log("\n", "\n", "All Roles", "\n", table, "\n", "\n");
-  });
-  await prompt();
+function viewAllDepartments() {
+  const sqlQuery = `SELECT name AS 'department', id FROM departments`;
+  const tableName = "Departments";
+  viewTable(sqlQuery, tableName);
 }
 
-async function viewAllEmployees() {
-  const sql = `SELECT 
+function viewAllRoles() {
+  const sqlQuery = `SELECT roles.title, roles.id, departments.name AS 'department', roles.salary FROM roles LEFT JOIN departments ON roles.department_id = departments.id`;
+  const tableName = "Roles";
+  viewTable(sqlQuery, tableName);
+}
+
+function viewAllEmployees() {
+  const sqlQuery = `SELECT 
                   e.id, 
                   e.first_name, 
                   e.last_name, 
@@ -44,12 +47,8 @@ async function viewAllEmployees() {
               LEFT JOIN employees m ON e.manager_id = m.id
               LEFT JOIN roles ON e.role_id = roles.id 
               LEFT JOIN departments ON roles.department_id = departments.id`;
-
-  db.query(sql, (err, rows) => {
-    const table = cTable.getTable(rows);
-    console.log("\n", "\n", "All Employees", "\n", table, "\n", "\n");
-  });
-  await prompt();
+  const tableName = "Employees";
+  viewTable(sqlQuery, tableName);
 }
 
 /* add to tables functions*/
