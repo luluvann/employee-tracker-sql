@@ -9,7 +9,7 @@ async function viewAllDepartments() {
     const table = cTable.getTable(rows);
     console.log("\n", "\n", "All Departments", "\n", table, "\n", "\n");
   });
-  await init();
+  await prompt();
 }
 
 async function viewAllRoles() {
@@ -20,7 +20,7 @@ async function viewAllRoles() {
       console.log("\n", "\n", "All Roles", "\n", table, "\n", "\n");
     }
   );
-  await init();
+  await prompt();
 }
 
 async function viewAllEmployees() {
@@ -42,7 +42,7 @@ async function viewAllEmployees() {
       console.log("\n", "\n", "All Employees", "\n", table, "\n", "\n");
     }
   );
-  await init();
+  await prompt();
 }
 /* add to tables functions*/
 async function addADepartment() {
@@ -69,7 +69,7 @@ async function addADepartment() {
           );
         }
       );
-      init();
+      prompt();
     });
 }
 
@@ -98,7 +98,7 @@ async function addRole(addRoleQuestions) {
         );
       }
     );
-    init();
+    prompt();
   });
 }
 
@@ -203,7 +203,7 @@ async function addEmployee(addEmployeeQuestions) {
         );
       }
     );
-    init();
+    prompt();
   });
 }
 
@@ -237,7 +237,7 @@ async function updateEmployeeRole(updateEmployeeRoleQuestions) {
         );
       }
     );
-    init();
+    prompt();
   });
 }
 
@@ -326,7 +326,7 @@ const updateEmployeeRoleQuestions = [
 ];
 
 /* Prompts function*/
-function init() {
+function prompt() {
   inquirer.prompt([...initialQuestion]).then((data) => {
     if (data.action === "view all employees") {
       viewAllEmployees();
@@ -349,4 +349,4 @@ function init() {
 }
 
 /* App start*/
-init();
+prompt();
