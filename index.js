@@ -51,6 +51,62 @@ function viewAllEmployees() {
   viewTable(sqlQuery, tableName);
 }
 
+/* Get the choices in the prompt questions*/
+function queryRolesManagersLists(addEmployeeQuestions) {
+  let rolesList = [];
+  db.query(`SELECT title, id FROM roles `, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      rolesList.push(rows[i].title);
+    }
+    addEmployeeQuestions[2].choices = rolesList;
+  });
+  let managersList = [];
+  db.query(
+    `SELECT CONCAT(first_name,", " , last_name) AS managers, id FROM employees`,
+    (err, rows) => {
+      for (let i = 0; i < rows.length; i++) {
+        managersList.push(rows[i].managers);
+      }
+      addEmployeeQuestions[3].choices = managersList;
+    }
+  );
+  return addEmployeeQuestions;
+}
+
+function queryRolesEmployeesLists(updateEmployeeRoleQuestions) {
+  let rolesList = [];
+  db.query(`SELECT title, id FROM roles `, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      rolesList.push(rows[i].title);
+    }
+    updateEmployeeRoleQuestions[2].choices = rolesList;
+  });
+
+  let employeesList = [];
+  db.query(
+    `SELECT CONCAT(first_name,", " , last_name) AS employee, id FROM employees`,
+    (err, rows) => {
+      for (let i = 0; i < rows.length; i++) {
+        employeesList.push(rows[i].employee);
+      }
+      updateEmployeeRoleQuestions[1].choices = employeesList;
+    }
+  );
+  return updateEmployeeRoleQuestions;
+}
+
+function queryDepartmentsList(addRoleQuestions) {
+  let departmentsList = [];
+  db.query(`SELECT name AS department FROM departments `, (err, rows) => {
+    for (let i = 0; i < rows.length; i++) {
+      departmentsList.push(rows[i].department);
+    }
+    addRoleQuestions[2].choices = departmentsList;
+  });
+
+  return addRoleQuestions;
+}
+
 /* add to tables functions*/
 async function addADepartment() {
   inquirer.prompt([...addDepartmentQuestion]).then((data) => {
@@ -89,62 +145,6 @@ async function addRole(addRoleQuestions) {
     });
     prompt();
   });
-}
-
-function queryRolesManagersLists(addEmployeeQuestions) {
-  let rolesList = [];
-  db.query(`SELECT title, id FROM roles `, (err, rows) => {
-    for (let i = 0; i < rows.length; i++) {
-      rolesList.push(rows[i].title);
-    }
-    addEmployeeQuestions[2].choices = rolesList;
-  });
-  let managersList = [];
-  db.query(
-    `SELECT CONCAT(first_name,", " , last_name) AS managers, id FROM employees`,
-    (err, rows) => {
-      for (let i = 0; i < rows.length; i++) {
-        managersList.push(rows[i].managers);
-      }
-      addEmployeeQuestions[3].choices = managersList;
-    }
-  );
-
-  return addEmployeeQuestions;
-}
-
-function queryRolesEmployeesLists(updateEmployeeRoleQuestions) {
-  let rolesList = [];
-  db.query(`SELECT title, id FROM roles `, (err, rows) => {
-    for (let i = 0; i < rows.length; i++) {
-      rolesList.push(rows[i].title);
-    }
-    updateEmployeeRoleQuestions[2].choices = rolesList;
-  });
-
-  let employeesList = [];
-  db.query(
-    `SELECT CONCAT(first_name,", " , last_name) AS employee, id FROM employees`,
-    (err, rows) => {
-      for (let i = 0; i < rows.length; i++) {
-        employeesList.push(rows[i].employee);
-      }
-      updateEmployeeRoleQuestions[1].choices = employeesList;
-    }
-  );
-  return updateEmployeeRoleQuestions;
-}
-
-function queryDepartmentsList(addRoleQuestions) {
-  let departmentsList = [];
-  db.query(`SELECT name AS department FROM departments `, (err, rows) => {
-    for (let i = 0; i < rows.length; i++) {
-      departmentsList.push(rows[i].department);
-    }
-    addRoleQuestions[2].choices = departmentsList;
-  });
-
-  return addRoleQuestions;
 }
 
 async function addEmployee(addEmployeeQuestions) {
@@ -195,6 +195,7 @@ async function addEmployee(addEmployeeQuestions) {
   });
 }
 
+/* Update functions*/
 async function updateEmployeeRole(updateEmployeeRoleQuestions) {
   let newUpdateEmployeeRoleQuestions = queryRolesEmployeesLists(
     updateEmployeeRoleQuestions
