@@ -16,6 +16,14 @@ const initialQuestion = [
       ],
     },
   ];
+
+  const addDepartmentQuestion = [
+    {
+      type: "input",
+      name: "addDepartment",
+      message: "Enter the name of the department to add: ",
+    },
+  ]
   
   const addRoleQuestions = [
     {
@@ -82,4 +90,4 @@ const initialQuestion = [
     },
   ];
 
-  module.exports = {initialQuestion, addRoleQuestions, addEmployeeQuestions, updateEmployeeRoleQuestions}
+  module.exports = {initialQuestion, addDepartmentQuestion, addRoleQuestions, addEmployeeQuestions, updateEmployeeRoleQuestions}

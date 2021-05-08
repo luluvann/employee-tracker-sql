@@ -6,14 +6,16 @@ const cTable = require("console.table");
 const questions = require("./questions");
 
 const initialQuestion = questions.initialQuestion;
+const addDepartmentQuestion = questions.addDepartmentQuestion;
 const addRoleQuestions = questions.addRoleQuestions;
 const addEmployeeQuestions = questions.addEmployeeQuestions;
-const updateEmployeeRoleQuestions = questions.updateEmployeeRoleQuestions
+const updateEmployeeRoleQuestions = questions.updateEmployeeRoleQuestions;
 
 /* Query functions */
 /* view tables functions*/
 async function viewAllDepartments() {
-  db.query(`SELECT name AS 'department', id FROM departments`, (err, rows) => {
+  const sql = `SELECT name AS 'department', id FROM departments`;
+  db.query(sql, (err, rows) => {
     const table = cTable.getTable(rows);
     console.log("\n", "\n", "All Departments", "\n", table, "\n", "\n");
   });
@@ -21,91 +23,71 @@ async function viewAllDepartments() {
 }
 
 async function viewAllRoles() {
-  db.query(
-    `SELECT roles.title, roles.id, departments.name AS 'department', roles.salary FROM roles LEFT JOIN departments ON roles.department_id = departments.id`,
-    (err, rows) => {
-      const table = cTable.getTable(rows);
-      console.log("\n", "\n", "All Roles", "\n", table, "\n", "\n");
-    }
-  );
+  const sql = `SELECT roles.title, roles.id, departments.name AS 'department', roles.salary FROM roles LEFT JOIN departments ON roles.department_id = departments.id`;
+  db.query(sql, (err, rows) => {
+    const table = cTable.getTable(rows);
+    console.log("\n", "\n", "All Roles", "\n", table, "\n", "\n");
+  });
   await prompt();
 }
 
 async function viewAllEmployees() {
-  db.query(
-    `SELECT 
-        e.id, 
-        e.first_name, 
-        e.last_name, 
-        roles.title, 
-        departments.name AS 'department',
-        roles.salary,
-        CONCAT(m.first_name,' ' ,m.last_name) AS 'manager' 
-    FROM employees e 
-    LEFT JOIN employees m ON e.manager_id = m.id
-    LEFT JOIN roles ON e.role_id = roles.id 
-    LEFT JOIN departments ON roles.department_id = departments.id`,
-    (err, rows) => {
-      const table = cTable.getTable(rows);
-      console.log("\n", "\n", "All Employees", "\n", table, "\n", "\n");
-    }
-  );
+  const sql = `SELECT 
+                  e.id, 
+                  e.first_name, 
+                  e.last_name, 
+                  roles.title, 
+                  departments.name AS 'department',
+                  roles.salary,
+                  CONCAT(m.first_name,' ' ,m.last_name) AS 'manager' 
+              FROM employees e 
+              LEFT JOIN employees m ON e.manager_id = m.id
+              LEFT JOIN roles ON e.role_id = roles.id 
+              LEFT JOIN departments ON roles.department_id = departments.id`;
+
+  db.query(sql, (err, rows) => {
+    const table = cTable.getTable(rows);
+    console.log("\n", "\n", "All Employees", "\n", table, "\n", "\n");
+  });
   await prompt();
 }
+
 /* add to tables functions*/
 async function addADepartment() {
-  inquirer
-    .prompt([
-      {
-        type: "input",
-        name: "addDepartment",
-        message: "Enter the name of the department to add: ",
-      },
-    ])
-    .then((data) => {
-      let department_name = [[data.addDepartment]];
-      console.log(department_name);
-      db.query(
-        "INSERT INTO departments (name) VALUES ?",
-        [department_name],
-        (err, results) => {
-          if (err) {
-            return console.error(err.message);
-          }
-          console.log(
-            "Number of rows successfully added: " + results.affectedRows
-          );
-        }
-      );
-      prompt();
+  inquirer.prompt([...addDepartmentQuestion]).then((data) => {
+    const sql = "INSERT INTO departments (name) VALUES ?";
+    let department_name = [[data.addDepartment]];
+
+    db.query(sql, [department_name], (err, results) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      console.log("Number of rows successfully added: " + results.affectedRows);
     });
+    prompt();
+  });
 }
 
 async function addRole(addRoleQuestions) {
   let newAddRoleQuestions = queryDepartmentsList(addRoleQuestions);
   inquirer.prompt([...newAddRoleQuestions]).then((data) => {
-    db.query(
-      "SELECT id FROM departments WHERE name = ?",
-      [[data.department]],
-      (err, results) => {
+    const sql = "SELECT id FROM departments WHERE name = ?";
+    db.query(sql, [[data.department]], (err, results) => {
+      if (err) {
+        return console.error(err.message);
+      }
+      let role_data = [[data.title, data.salary, results[0].id]];
+      const sqlInsert =
+        "INSERT INTO roles (title, salary, department_id) VALUES ?";
+      db.query(sqlInsert, [role_data], (err, results) => {
         if (err) {
           return console.error(err.message);
         }
-        let role_data = [[data.title, data.salary, results[0].id]];
-        db.query(
-          "INSERT INTO roles (title, salary, department_id) VALUES ?",
-          [role_data],
-          (err, results) => {
-            if (err) {
-              return console.error(err.message);
-            }
-            console.log(
-              "Number of rows successfully added: " + results.affectedRows
-            );
-          }
+        console.log(
+          "Number of rows successfully added: " + results.affectedRows
         );
-      }
-    );
+      });
+    });
     prompt();
   });
 }
@@ -151,7 +133,6 @@ function queryRolesEmployeesLists(updateEmployeeRoleQuestions) {
       updateEmployeeRoleQuestions[1].choices = employeesList;
     }
   );
-
   return updateEmployeeRoleQuestions;
 }
 
