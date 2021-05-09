@@ -3,15 +3,34 @@
 ## Description 
 An app to view and interact with the employees SQL database from the command line
 
-## Walktrough video
-
-
 ## Table of Contents
 
+* [Walkthrough Video](#walkthrough-video)
 * [Installation](#installation)
 * [Usage](#usage)
 * [Technologies](#technologies)
 * [User Story and Acceptance criteria](#User-Story-and-Acceptance-criteria)
+
+## Walktrough video
+[https://drive.google.com/file/d/1V-pXa0SWoqB86whcCL1nWDliNWBY-MS3/view](https://drive.google.com/file/d/1V-pXa0SWoqB86whcCL1nWDliNWBY-MS3/view)
+
+Timeline :
+- 0'00 : ***Start the app***
+- 0'06 : ***View all departments***
+- 0'14 : ***View all roles***
+- 0'21 : ***View all employees***
+- 0'30 : ***Add a new department*** (Customer Service)
+- 0'40 : Check that the new department has been added to db (View all departments)
+- 0'50 : ***Add a new role*** (Customer Service Rep)
+- 1'14 : Check that the new role has been added to the db (View all roles)
+- 1'24 : ***Add a new employee*** (Kelly Kapoor as a Customer Service Rep and reporting to Michael Scott)
+- 1'47 : Check that the new employee has been added to the db (View all employees)
+- 2'02 : ***Update role of an existing employee*** (Dwight Schrute with the new role of Branch Manager)
+- 2'15 : Check that the new role has been changed for that employee (View all employees)
+- 2'24 : ***Exit the app***
+
+
+
 
 ## Installation
 1. Clone the repo 
